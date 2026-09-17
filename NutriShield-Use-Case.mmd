@@ -1,0 +1,143 @@
+%% NutriShield v2 — Use Case Diagram
+%% Current sandbox capabilities are separated from optional integrations.
+usecaseDiagram
+  actor "Pengasuh / Keluarga" as Family
+  actor "Pengguna Telegram" as TgUser
+  actor "Operator Sandbox" as Operator
+  actor "Reviewer Keselamatan" as Reviewer
+  actor "Sumber Data Pangan" as FoodSource
+  actor "OpenAI-compatible LLM" as LLM
+  actor "Telegram API" as TgAPI
+
+  rectangle "NutriShield v2\nWeb + Agent Runtime" {
+    package "Identitas & Privasi" {
+      usecase "Registrasi akun" as UC_Register
+      usecase "Login / logout" as UC_Login
+      usecase "Menyetujui pemrosesan data" as UC_Consent
+      usecase "Memeriksa sesi & kepemilikan data" as UC_Authz
+      usecase "Memutus tautan kanal" as UC_Unlink
+    }
+
+    package "Catatan Keluarga" {
+      usecase "Membuat profil anak" as UC_Child
+      usecase "Mencatat pengukuran" as UC_Measure
+      usecase "Melihat dashboard keluarga" as UC_Dashboard
+      usecase "Melihat riwayat aktivitas agent" as UC_History
+    }
+
+    package "Percakapan & Agent" {
+      usecase "Mengajukan pertanyaan" as UC_Ask
+      usecase "Memuat konteks keluarga" as UC_Observe
+      usecase "Memeriksa kualitas data" as UC_Quality
+      usecase "Menjalankan safety policy" as UC_Safety
+      usecase "Mencari evidence pangan" as UC_Retrieve
+      usecase "Memilih aksi yang diizinkan" as UC_Plan
+      usecase "Menjelaskan hasil secara sederhana" as UC_Explain
+      usecase "Memvalidasi output & klaim" as UC_Guard
+      usecase "Mencatat trace & audit event" as UC_Record
+      usecase "Menggunakan deterministic fallback" as UC_Fallback
+      usecase "Menghentikan tanda bahaya / dosis" as UC_Block
+      usecase "Melihat jejak 8 tahap agent" as UC_Trace
+    }
+
+    package "Data Pangan" {
+      usecase "Mencari informasi pangan" as UC_SearchFood
+      usecase "Melihat provenance & mutu data" as UC_Provenance
+      usecase "Mengimpor raw records" as UC_Raw
+      usecase "Menormalisasi record" as UC_Normalize
+      usecase "Mengarantina data ambigu" as UC_Quarantine
+      usecase "Menetapkan eligibility\ndiscovery / comparison / planning" as UC_Eligibility
+      usecase "Menerbitkan laporan pipeline" as UC_Report
+    }
+
+    package "Telegram" {
+      usecase "Membuat kode tautan sekali pakai" as UC_LinkCode
+      usecase "Menautkan identitas Telegram" as UC_Link
+      usecase "Menerima webhook Telegram" as UC_Webhook
+      usecase "Mengirim balasan dengan consent" as UC_Deliver
+      usecase "Menyimpan status delivery" as UC_DeliveryState
+    }
+
+    package "Operasi Sandbox" {
+      usecase "Memeriksa health API & database" as UC_Health
+      usecase "Menjalankan worker job" as UC_Worker
+      usecase "Menjalankan scheduler selama proses aktif" as UC_Schedule
+      usecase "Meninjau isu / audit" as UC_Review
+    }
+  }
+
+  Family --> UC_Register
+  Family --> UC_Login
+  Family --> UC_Consent
+  Family --> UC_Child
+  Family --> UC_Measure
+  Family --> UC_Dashboard
+  Family --> UC_History
+  Family --> UC_Ask
+  Family --> UC_SearchFood
+  Family --> UC_Provenance
+  Family --> UC_Trace
+  Family --> UC_LinkCode
+  Family --> UC_Unlink
+
+  TgUser --> UC_Link
+  TgUser --> UC_Webhook
+  TgAPI --> UC_Webhook
+  TgAPI --> UC_Deliver
+  LLM --> UC_Explain
+  FoodSource --> UC_Raw
+  Operator --> UC_Raw
+  Operator --> UC_Normalize
+  Operator --> UC_Quarantine
+  Operator --> UC_Eligibility
+  Operator --> UC_Report
+  Operator --> UC_Health
+  Operator --> UC_Worker
+  Operator --> UC_Schedule
+  Reviewer --> UC_Review
+  Reviewer --> UC_Block
+
+  UC_Register ..> UC_Consent : <<include>>
+  UC_Login ..> UC_Authz : <<include>>
+  UC_Child ..> UC_Authz : <<include>>
+  UC_Measure ..> UC_Authz : <<include>>
+  UC_Dashboard ..> UC_Authz : <<include>>
+  UC_Ask ..> UC_Authz : <<include>>
+  UC_Ask ..> UC_Observe : <<include>>
+  UC_Ask ..> UC_Quality : <<include>>
+  UC_Ask ..> UC_Safety : <<include>>
+  UC_Ask ..> UC_Plan : <<include>>
+  UC_Ask ..> UC_Guard : <<include>>
+  UC_Ask ..> UC_Record : <<include>>
+  UC_Safety ..> UC_Block : <<extend>>
+  UC_Plan ..> UC_Retrieve : <<include>>
+  UC_Plan ..> UC_Explain : <<include>>
+  UC_Explain ..> UC_Fallback : <<extend>>
+  UC_History ..> UC_Record : <<include>>
+  UC_Trace ..> UC_Record : <<include>>
+  UC_SearchFood ..> UC_Provenance : <<include>>
+  UC_LinkCode ..> UC_Authz : <<include>>
+  UC_Link ..> UC_LinkCode : <<include>>
+  UC_Webhook ..> UC_Authz : <<include>>
+  UC_Webhook ..> UC_Ask : <<include>>
+  UC_Deliver ..> UC_Link : <<include>>
+  UC_Deliver ..> UC_DeliveryState : <<include>>
+  UC_Raw ..> UC_Normalize : <<include>>
+  UC_Normalize ..> UC_Quarantine : <<include>>
+  UC_Normalize ..> UC_Eligibility : <<include>>
+  UC_Report ..> UC_Eligibility : <<include>>
+  UC_Child ..> UC_Worker : <<include>>
+  UC_Measure ..> UC_Worker : <<include>>
+  UC_Schedule ..> UC_Worker : <<include>>
+  UC_Review ..> UC_Record : <<include>>
+
+  note right of UC_Explain
+    LLM opsional dan server-side.
+    Hanya menjelaskan hasil
+    deterministik yang sudah lolos policy.
+  end note
+  note right of UC_Deliver
+    Telegram live tetap unconfigured
+    sampai token baru, webhook HTTPS,
+    identity link, dan consent tersedia.
+  end note
