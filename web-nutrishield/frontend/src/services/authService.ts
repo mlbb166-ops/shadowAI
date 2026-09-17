@@ -22,11 +22,12 @@ export const authService = {
    */
   async verify(): Promise<UserSession | null> {
     try {
-      const res = asRecord(await endpoints.me());
+      const response = asRecord(await endpoints.me());
+      const res = asRecord(response.user || response);
       if (!res.id) return null;
       const session: UserSession = {
         id: String(res.id),
-        name: String(res.name || ''),
+        name: String(res.display_name || res.name || ''),
         email: String(res.email || ''),
         role: (res.role as UserRole) || 'parent',
       };
@@ -58,7 +59,7 @@ export const authService = {
     const user = asRecord(res.user || res);
     const session: UserSession = {
       id: String(user.id),
-      name: String(user.name || ''),
+      name: String(user.display_name || user.name || ''),
       email: String(user.email || ''),
       role: (user.role as UserRole) || 'parent',
     };
@@ -74,7 +75,7 @@ export const authService = {
     const user = asRecord(res.user || res);
     const session: UserSession = {
       id: String(user.id),
-      name: String(user.name || ''),
+      name: String(user.display_name || user.name || ''),
       email: String(user.email || ''),
       role: (user.role as UserRole) || 'parent',
     };

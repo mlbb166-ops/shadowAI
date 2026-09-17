@@ -25,20 +25,20 @@ const domains = [
   {
     title: "1. Identitas & Privasi",
     icon: LockKeyhole,
-    desc: "Sesi terenkripsi, profil anak terpisah per akun, dan rekaman persetujuan eksplisit.",
+    desc: "Token sesi opaque disimpan sebagai hash, profil anak terpisah per akun, dan persetujuan dicatat.",
     tables: ["users", "sessions", "child_profiles", "consents", "channel_link_codes"],
   },
   {
     title: "2. Catatan Pertumbuhan Keluarga",
     icon: Scale,
-    desc: "Pencatatan antropometri (BB, TB/PB, LK) riil berbasis standar WHO Anthro 2006.",
-    tables: ["measurements", "growth_assessments", "care_tasks", "daily_logs"],
+    desc: "Pencatatan berat, tinggi/panjang, lingkar kepala, dan catatan harian tanpa diagnosis otomatis.",
+    tables: ["measurements", "daily_logs"],
   },
   {
     title: "3. Danau Data Pangan Nusantara",
     icon: Database,
-    desc: "Gudang data pangan lokal TKPI Kemenkes RI 2020, data BPOM BTP, dan Open Food Facts.",
-    tables: ["tkpi_foods", "canonical_foods", "food_nutrients", "food_catalog", "normalization_issues"],
+    desc: "Snapshot Panganku/IFCT, referensi BTP BPOM, dan Open Food Facts dengan provenance terpisah.",
+    tables: ["raw_food_records", "canonical_foods", "food_nutrients", "normalization_issues"],
   },
   {
     title: "4. Eksekusi & Audit Agen AI",
@@ -50,13 +50,13 @@ const domains = [
 
 const stages = [
   { order: "01", name: "Observer", desc: "Membaca profil anak, usia, riwayat timbangan, dan persetujuan keluarga." },
-  { order: "02", name: "Data Quality", desc: "Validasi keabsahan angka (rentang usia 0-60 bln, outlier, duplikasi)." },
-  { order: "03", name: "Safety Policy", desc: "Pemeriksaan aturan keselamatan (peringatan tanda bahaya, alergen, usia)." },
-  { order: "04", name: "Food Retriever", desc: "Pencarian pangan kanonikal lokal yang terverifikasi dan memenuhi syarat." },
-  { order: "05", name: "Planner", desc: "Menyusun tindakan deterministik (rekomendasi menu lokal & jadwal ukur)." },
+  { order: "02", name: "Data Quality", desc: "Memeriksa kelengkapan profil, rentang angka, dan kemungkinan duplikasi." },
+  { order: "03", name: "Safety Policy", desc: "Memblokir bahasa darurat dan permintaan dosis sebelum model dipanggil." },
+  { order: "04", name: "Food Retriever", desc: "Mencari hanya pada scope eligibility yang dinyatakan secara eksplisit." },
+  { order: "05", name: "Action Planner", desc: "Memilih aksi dari allow-list; bukan membuat terapi atau keputusan klinis." },
   { order: "06", name: "Family Explainer", desc: "Menerjemahkan hasil ke bahasa Indonesia yang hangat, ramah, dan jelas." },
   { order: "07", name: "Output Guard", desc: "Memeriksa agar output tidak memberikan diagnosis obat atau klaim medis keliru." },
-  { order: "08", name: "Action Recorder", desc: "Menyimpan hasil ke database SQLite, memicu notifikasi, dan mencatat log audit." },
+  { order: "08", name: "Action Recorder", desc: "Menyimpan hasil, versi kebijakan, status model, dan event audit ke SQLite." },
 ];
 
 export default function Architecture() {
@@ -113,7 +113,7 @@ export default function Architecture() {
             <span className="font-serif italic text-[#25875c]">dari data mentah ke jawaban bertanggung jawab.</span>
           </h1>
           <p className="mt-4 text-base leading-7 text-[#577264] sm:text-lg">
-            NutriShield menolak konsep "AI kotak hitam". Setiap rekomendasi dipandu oleh aturan deterministik Box-Cox LMS WHO 2006, database gizi resmi TKPI Kemenkes RI 2020, dan sistem koordinasi agen 8 tahapan dengan jejak audit nyata.
+            NutriShield menolak konsep "AI kotak hitam". Setiap jawaban melewati kebijakan deterministik, retrieval dengan eligibility eksplisit, output guard, dan delapan tahap dengan jejak audit nyata.
           </p>
         </div>
 
@@ -126,8 +126,8 @@ export default function Architecture() {
             </div>
             {stats && (
               <div className="hidden text-right text-xs text-[#627a6d] sm:block">
-                <span>{stats.total_records ?? "6.039"} data sumber</span> ·{" "}
-                <span className="font-semibold text-[#1d7952]">{stats.canonical_records ?? "1.146"} pangan kanonikal</span>
+                <span>{stats.raw_records ?? "—"} data sumber</span> ·{" "}
+                <span className="font-semibold text-[#1d7952]">{stats.canonical_records ?? "—"} pangan kanonis</span>
               </div>
             )}
           </div>
@@ -144,14 +144,14 @@ export default function Architecture() {
               <span className="font-mono text-xs font-bold text-[#1d7952]">02</span>
               <h3 className="mt-3 text-lg font-semibold">Normalisasi</h3>
               <p className="mt-2 text-xs leading-5 text-[#637d70]">
-                Pembersihan unicode, standarisasi takaran gram/100g, deteksi alergen, dan klasifikasi jenis pangan olahan vs pangan segar.
+                Pembersihan Unicode, klasifikasi tipe record, parsing nutrien eksplisit, dan pencatatan isu kualitas.
               </p>
             </div>
             <div className="rounded-2xl border border-[#dfe8df] bg-white p-6 shadow-sm">
               <span className="font-mono text-xs font-bold text-[#1d7952]">03</span>
               <h3 className="mt-3 text-lg font-semibold">Canonical Foods</h3>
               <p className="mt-2 text-xs leading-5 text-[#637d70]">
-                Penggabungan konservatif entitas pangan lokal bernutrisi tinggi (ikan kembung, hati ayam, tempe, kelor) tanpa manipulasi angka nol.
+                Pembentukan entitas kanonis secara konservatif berdasarkan kode resmi, barcode, nomor BPOM, atau identitas sumber.
               </p>
             </div>
             <div className="rounded-2xl border border-[#bceecb] bg-[#f0f8f2] p-6 shadow-sm">
@@ -211,7 +211,7 @@ export default function Architecture() {
               Delapan Tahap Koordinasi Agen Mandiri
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#bdd4c7]">
-              Sebelum model bahasa generatif menghasilkan teks sapaan ke keluarga, tujuh gerbang aturan keselamatan dan validasi data klinis telah selesai dieksekusi secara berurutan.
+              Sebelum model bahasa opsional menyusun penjelasan, observer, quality check, safety policy, retrieval, dan action planner selesai. Keluaran lalu diperiksa dan dicatat.
             </p>
           </div>
 
@@ -234,7 +234,7 @@ export default function Architecture() {
           <div className="mt-8 rounded-xl border border-white/15 bg-black/20 p-4 text-xs text-[#cadad0]">
             <p className="font-semibold text-white">Prinsip Batas Keamanan & Audit:</p>
             <p className="mt-1">
-              Agen tidak diperkenankan mengeksekusi shell atau kode Python arbitrary. Jika terdeteksi kata kunci darurat (sesak napas, kejang, dehidrasi berat) atau alergen berisiko tinggi, sistem segera menghentikan alur generatif dan menampilkan kontak rujukan Puskesmas/Rumah Sakit terdekat.
+              Agen tidak dapat mengeksekusi shell atau kode Python arbitrer. Jika terdeteksi kata kunci darurat atau permintaan dosis, sistem melewati model generatif dan mengarahkan keluarga mencari bantuan kesehatan langsung.
             </p>
           </div>
         </section>
@@ -244,7 +244,7 @@ export default function Architecture() {
           <div>
             <h3 className="text-xl font-semibold">Ingin mencoba langsung catatan keluarga?</h3>
             <p className="mt-1 text-sm text-[#5f796c]">
-              Daftarkan profil anak Anda dan rasakan kemudahan pemantauan tumbuh kembang berbasis sains.
+              Daftarkan profil anak, catat pengukuran, dan periksa setiap langkah yang dijalankan agent.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -271,7 +271,6 @@ export default function Architecture() {
             <Link href="/panduan" className="hover:underline">Panduan Kanal</Link>
             <Link href="/architecture" className="hover:underline">Arsitektur</Link>
             <Link href="/sumber-data" className="hover:underline">Sumber Data</Link>
-            <Link href="/kader" className="text-[#1b764f] font-semibold hover:underline">Mode Posyandu</Link>
           </div>
         </div>
       </footer>

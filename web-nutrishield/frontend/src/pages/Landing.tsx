@@ -5,8 +5,8 @@ import { useState } from "react";
 
 const steps = [
   { no: "01", title: "Memahami keluarga", text: "Membaca usia, alergi, riwayat penimbangan, serta kondisi pangan lokal keluarga." },
-  { no: "02", title: "Menyaring risiko", text: "Aturan deterministik Box-Cox LMS WHO 2006 bekerja sebelum AI menyusun saran atau menu." },
-  { no: "03", title: "Menyusun tindakan", text: "Agen membuat rencana makan lokal 7 hari, memantau progres, dan menjelaskan alasannya." },
+  { no: "02", title: "Menyaring risiko", text: "Aturan deterministik mengenali tanda darurat dan menahan permintaan dosis sebelum model bahasa dipanggil." },
+  { no: "03", title: "Menyusun penjelasan", text: "Model bahasa hanya membantu merangkum hasil yang sudah dibatasi oleh konteks dan kebijakan." },
   { no: "04", title: "Menaikkan perhatian", text: "Ketika pola pertumbuhan perlu diperiksa, keluarga mendapat ringkasan untuk dibawa ke Posyandu." },
 ];
 
@@ -125,20 +125,20 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Floating Agent Badge */}
+          {/* Honest pipeline summary */}
           <div className="absolute bottom-6 right-6 hidden w-[320px] rounded-3xl border border-white/60 bg-white/85 p-5 shadow-[0_20px_60px_rgba(25,65,46,.16)] backdrop-blur-xl lg:block">
             <div className="flex items-start gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#e3f4e7] text-[#1d8155]">
                 <Bot size={20} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#143e32]">Agent baru selesai bekerja</p>
-                <p className="mt-1 text-xs leading-5 text-[#627a6d]">4 bahan diperiksa · 7 menu disusun · tidak ada risiko baru</p>
+                <p className="text-sm font-semibold text-[#143e32]">Pipeline agent dapat diaudit</p>
+                <p className="mt-1 text-xs leading-5 text-[#627a6d]">Kebijakan → bukti → penjelasan → output guard → catatan aksi</p>
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-[#dae6dc] pt-3 text-[11px] text-[#698274]">
-              <span>NS-20260916-2184</span>
-              <span className="font-semibold text-[#218258]">1,8 detik</span>
+              <span>8 tahap tetap</span>
+              <span className="font-semibold text-[#218258]">fallback aman</span>
             </div>
           </div>
         </section>
@@ -147,20 +147,20 @@ export default function Landing() {
         <section className="border-y border-[#e2ebe2] bg-white">
           <div className="mx-auto grid max-w-[1280px] grid-cols-2 gap-6 px-5 py-8 sm:grid-cols-4 sm:px-8">
             <div>
-              <p className="text-3xl font-bold tracking-tight text-[#173f34]">1.646</p>
-              <p className="mt-1 text-xs text-[#627a6d]">record pangan bersumber</p>
+              <p className="text-3xl font-bold tracking-tight text-[#173f34]">7.809</p>
+              <p className="mt-1 text-xs text-[#627a6d]">record mentah berprovenance</p>
             </div>
             <div>
               <p className="text-3xl font-bold tracking-tight text-[#173f34]">8</p>
               <p className="mt-1 text-xs text-[#627a6d]">tahap koordinasi agen</p>
             </div>
             <div>
-              <p className="text-3xl font-bold tracking-tight text-[#173f34]">7 hari</p>
-              <p className="mt-1 text-xs text-[#627a6d]">rencana menu lokal</p>
+              <p className="text-3xl font-bold tracking-tight text-[#173f34]">7.026</p>
+              <p className="mt-1 text-xs text-[#627a6d]">entitas pangan kanonis</p>
             </div>
             <div>
-              <p className="text-3xl font-bold tracking-tight text-[#173f34]">100%</p>
-              <p className="mt-1 text-xs text-[#627a6d]">jejak proses transparan</p>
+              <p className="text-3xl font-bold tracking-tight text-[#173f34]">0</p>
+              <p className="mt-1 text-xs text-[#627a6d]">record diklaim siap menu tanpa bukti</p>
             </div>
           </div>
         </section>
@@ -174,7 +174,7 @@ export default function Landing() {
                 AI yang bekerja,<br />bukan sekadar menjawab.
               </h2>
               <p className="mt-5 text-sm leading-7 text-[#577062]">
-                Setiap rekomendasi melewati rangkaian aturan keselamatan box-cox LMS WHO dan pangan lokal TKPI Kemenkes. Pengguna dapat memeriksa apa yang dianalisis, diblokir, atau diteruskan.
+                Setiap jawaban melewati aturan keselamatan, pemeriksaan bukti, penjelasan terbatas, output guard, dan pencatatan aksi. Pengguna dapat memeriksa apa yang dianalisis, diblokir, atau diteruskan.
               </p>
               <Link href="/architecture" className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[#1d7952] hover:underline">
                 Pelajari arsitektur data & audit agen →
@@ -204,18 +204,18 @@ export default function Landing() {
             <div className="mt-12 grid gap-5 md:grid-cols-3">
               <Feature
                 icon={<HeartPulse />}
-                title="Growth Sentinel"
-                text="Melihat arah perubahan berat dan tinggi anak dengan Z-score WHO 2006, lalu menyiapkan ringkasan tindak lanjut."
+                title="Catatan pertumbuhan"
+                text="Menyimpan pengukuran berurutan dan menampilkan arah perubahan tanpa mengklaim diagnosis klinis."
               />
               <Feature
                 icon={<Database />}
-                title="Local Food Planner"
-                text="Menyusun menu lokal 7 hari berbasis TKPI 2020 sesuai alergi, tekstur, dan ketersediaan pasar lokal."
+                title="Katalog pangan berlapis"
+                text="Memisahkan record mentah, pangan kanonis, dan status kelayakan agar nama produk tidak dianggap otomatis sebagai bukti gizi."
               />
               <Feature
                 icon={<UsersRound />}
-                title="Mode Keluarga & Kader"
-                text="Tampilan sederhana untuk orang tua, dengan modul kohort desa terpisah bagi kader pendamping."
+                title="Akun keluarga privat"
+                text="Data anak, pengukuran, dan Telegram dibatasi ke pemilik sesi dengan kode taut sekali pakai."
               />
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function Landing() {
                 Keputusan AI dibatasi oleh aturan yang bisa diperiksa.
               </h2>
               <p className="mt-5 text-sm leading-7 text-[#577062]">
-                NutriShield memisahkan fakta laboratorium, aturan klinis, dan penjelasan bahasa. Jika data belum cukup atau ada risiko darurat, sistem secara transparan mengarahkan ke faskes rujukan.
+                NutriShield memisahkan data sumber, kebijakan deterministik, dan penjelasan bahasa. Jika bukti belum cukup atau ada bahasa darurat, sistem berhenti dan mengarahkan keluarga mencari bantuan langsung.
               </p>
               <Link href="/sumber-data">
                 <Button variant="link" className="mt-5 px-0 font-semibold text-[#1c7d53]">
@@ -270,7 +270,7 @@ export default function Landing() {
               <ul className="mt-3 space-y-2">
                 <li><Link href="/app" className="hover:text-[#173f34]">Dashboard Keluarga</Link></li>
                 <li><Link href="/rencana" className="hover:text-[#173f34]">Rencana Makan 7 Hari</Link></li>
-                <li><Link href="/pertumbuhan" className="hover:text-[#173f34]">Grafik Pertumbuhan WHO</Link></li>
+                <li><Link href="/pertumbuhan" className="hover:text-[#173f34]">Catatan Pertumbuhan</Link></li>
                 <li><Link href="/agent-center" className="hover:text-[#173f34]">Pusat Agen Mandiri</Link></li>
               </ul>
             </div>
@@ -280,15 +280,14 @@ export default function Landing() {
               <ul className="mt-3 space-y-2">
                 <li><Link href="/architecture" className="hover:text-[#173f34]">Arsitektur & Audit Trail</Link></li>
                 <li><Link href="/panduan" className="hover:text-[#173f34]">Panduan Kanal Bot</Link></li>
-                <li><Link href="/sumber-data" className="hover:text-[#173f34]">Sumber Data TKPI & WHO</Link></li>
-                <li><Link href="/kader" className="font-semibold text-[#1d7952] hover:underline">Portal Kader Posyandu</Link></li>
+                <li><Link href="/sumber-data" className="hover:text-[#173f34]">Sumber Data & Kelayakan</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold text-[#163e31] uppercase tracking-wider text-[11px]">Batasan Medis</h4>
               <p className="mt-3 leading-6 text-[#698275]">
-                NutriShield adalah alat bantu pendamping keluarga dan kader, bukan alat diagnosis medis. Selalu konsultasikan kondisi klinis anak ke dokter atau Puskesmas terdekat.
+                NutriShield adalah alat bantu pencatatan dan pendamping keluarga, bukan alat diagnosis medis. Selalu konsultasikan kondisi klinis anak ke dokter atau Puskesmas terdekat.
               </p>
             </div>
           </div>
@@ -296,11 +295,11 @@ export default function Landing() {
           <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#e2ece2] pt-6 sm:flex-row text-[11px] text-[#718a7c]">
             <p>© 2026 NutriShield (Shadow AI). Seluruh hak cipta dilindungi.</p>
             <div className="flex gap-4">
-              <span>TKPI Kemenkes RI 2020</span>
+              <span>SQLite v2</span>
               <span>•</span>
-              <span>WHO Anthro 2006</span>
+              <span>8 tahap agent</span>
               <span>•</span>
-              <span>Permenkes RI No. 2/2020</span>
+              <span>Eligibility data eksplisit</span>
             </div>
           </div>
         </div>

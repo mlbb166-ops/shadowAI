@@ -1,33 +1,24 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense } from "react";
 import { Route, Switch, useLocation } from "wouter";
-import Landing from "./pages/Landing";
-import Home from "./pages/Home";
-import Planner from "./pages/Planner";
-import Growth from "./pages/Growth";
-import AgentCenter from "./pages/AgentCenter";
-import Channels from "./pages/Channels";
-import BotGuide from "./pages/BotGuide";
-import Sources from "./pages/Sources";
-import Architecture from "./pages/Architecture";
-import AuthPage from "./pages/AuthPage";
-import NotFound from "./pages/NotFound";
-import { DashboardLayout } from "./components/DashboardLayout";
-import { AnthroCalculator } from "./components/AnthroCalculator";
-import { SupervisorHub } from "./components/SupervisorHub";
-import { FoodComparator } from "./components/FoodComparator";
-import { ReportModal } from "./components/ReportModal";
-import { ChildDetailModal } from "./components/ChildDetailModal";
-import { KaderGuard } from "./components/KaderGuard";
 import { AuthGuard } from "./components/AuthGuard";
-import { authService } from "./services/authService";
+
+const Landing = lazy(() => import("./pages/Landing"));
+const Home = lazy(() => import("./pages/Home"));
+const Planner = lazy(() => import("./pages/Planner"));
+const Growth = lazy(() => import("./pages/Growth"));
+const AgentCenter = lazy(() => import("./pages/AgentCenter"));
+const Channels = lazy(() => import("./pages/Channels"));
+const BotGuide = lazy(() => import("./pages/BotGuide"));
+const Sources = lazy(() => import("./pages/Sources"));
+const Architecture = lazy(() => import("./pages/Architecture"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 export const App: React.FC = () => {
   const [, setLocation] = useLocation();
-  const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
   return (
-    <>
+    <Suspense fallback={<div className="grid min-h-screen place-items-center bg-[#f6f8f4] text-sm text-[#36594a]">Memuat NutriShield…</div>}>
       <Switch>
         {/* ── 1. PUBLIC ROUTES (no auth required) ── */}
         <Route path="/" component={Landing} />
@@ -36,9 +27,6 @@ export const App: React.FC = () => {
         <Route path="/architecture" component={Architecture} />
         <Route path="/cara-kerja" component={Architecture} />
         <Route path="/sumber-data" component={Sources} />
-        <Route path="/kalkulator-who" component={AnthroCalculator} />
-        <Route path="/komparasi-pangan" component={FoodComparator} />
-
         {/* ── 2. AUTHENTICATION ROUTES ── */}
         <Route path="/login">
           {() => <AuthPage mode="login" onLoginSuccess={() => setLocation("/app")} />}
@@ -67,56 +55,11 @@ export const App: React.FC = () => {
           {() => <AuthGuard><Channels /></AuthGuard>}
         </Route>
 
-        {/* ── 4. POSYANDU CLINICAL WORKSPACE (login + PIN required) ── */}
-        <Route path="/kader">
-          {() => (
-            <AuthGuard>
-              <KaderGuard>
-                <DashboardLayout
-                  user={authService.getCurrentSession() || { id: '', name: 'Pengguna', email: '', role: 'parent' as const }}
-                  onLogout={async () => {
-                    await authService.logout();
-                    setLocation("/login");
-                  }}
-                  onOpenReportModal={() => setReportModalOpen(true)}
-                />
-              </KaderGuard>
-            </AuthGuard>
-          )}
-        </Route>
-        <Route path="/surveilans">
-          {() => (
-            <AuthGuard>
-              <KaderGuard>
-                <SupervisorHub
-                  onOpenReportModal={() => setReportModalOpen(true)}
-                  onSelectChild={(id) => setSelectedChildId(id)}
-                />
-              </KaderGuard>
-            </AuthGuard>
-          )}
-        </Route>
-
-        {/* ── 5. 404 FALLBACK ── */}
+        {/* ── 4. 404 FALLBACK ── */}
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
-
-      {/* Clinical Evidence Modal */}
-      <ReportModal
-        isOpen={reportModalOpen}
-        onClose={() => setReportModalOpen(false)}
-      />
-
-      {/* Child 360 Modal */}
-      {selectedChildId && (
-        <ChildDetailModal
-          childId={selectedChildId}
-          isOpen={Boolean(selectedChildId)}
-          onClose={() => setSelectedChildId(null)}
-        />
-      )}
-    </>
+    </Suspense>
   );
 };
 

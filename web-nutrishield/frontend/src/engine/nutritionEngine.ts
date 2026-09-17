@@ -1,4 +1,5 @@
 export type ChildProfile = {
+  childId?: string;
   name: string;
   ageMonths: number;
   allergy: string;
@@ -14,14 +15,14 @@ export type Measurement = {
 };
 
 export const foodCatalog = [
-  { id: "GR044", name: "Ikan kembung", group: "Protein hewani", role: "protein hewani dan lemak baik", estimate: 8000, tags: ["ikan", "seafood"], source: "TKPI / Panganku" },
-  { id: "HR058", name: "Telur ayam", group: "Protein hewani", role: "protein praktis dan kolin", estimate: 3500, tags: ["telur"], source: "TKPI / Panganku" },
-  { id: "KR010", name: "Tempe", group: "Protein nabati", role: "protein nabati dan energi", estimate: 2500, tags: ["kedelai", "tempe"], source: "TKPI / Panganku" },
-  { id: "BR010", name: "Hati ayam", group: "Protein hewani", role: "sumber zat besi heme", estimate: 5000, tags: ["ayam", "unggas"], source: "TKPI / Panganku" },
-  { id: "DR035", name: "Daun kelor", group: "Sayur", role: "sayur lokal pendamping makan", estimate: 1500, tags: ["sayur", "kelor"], source: "TKPI / Panganku" },
-  { id: "ER019", name: "Jambu biji", group: "Buah", role: "buah sumber vitamin C", estimate: 2500, tags: ["buah", "jambu"], source: "TKPI / Panganku" },
-  { id: "GR078", name: "Ikan teri segar", group: "Protein hewani", role: "alternatif protein lokal", estimate: 6000, tags: ["ikan", "seafood"], source: "TKPI / Panganku" },
-  { id: "AR001", name: "Beras", group: "Makanan pokok", role: "sumber energi utama", estimate: 2500, tags: ["beras", "nasi"], source: "TKPI / Panganku" },
+  { id: "GR044", name: "Ikan kembung", group: "Protein hewani", role: "bahan template protein hewani", estimate: 8000, tags: ["ikan", "seafood"], source: "Template internal" },
+  { id: "HR058", name: "Telur ayam", group: "Protein hewani", role: "bahan template protein", estimate: 3500, tags: ["telur"], source: "Template internal" },
+  { id: "KR010", name: "Tempe", group: "Protein nabati", role: "bahan template protein nabati", estimate: 2500, tags: ["kedelai", "tempe"], source: "Template internal" },
+  { id: "BR010", name: "Hati ayam", group: "Protein hewani", role: "bahan template protein hewani", estimate: 5000, tags: ["ayam", "unggas"], source: "Template internal" },
+  { id: "DR035", name: "Daun kelor", group: "Sayur", role: "bahan template sayur", estimate: 1500, tags: ["sayur", "kelor"], source: "Template internal" },
+  { id: "ER019", name: "Jambu biji", group: "Buah", role: "bahan template buah", estimate: 2500, tags: ["buah", "jambu"], source: "Template internal" },
+  { id: "GR078", name: "Ikan teri segar", group: "Protein hewani", role: "bahan template protein lokal", estimate: 6000, tags: ["ikan", "seafood"], source: "Template internal" },
+  { id: "AR001", name: "Beras", group: "Makanan pokok", role: "bahan template makanan pokok", estimate: 2500, tags: ["beras", "nasi"], source: "Template internal" },
 ];
 
 const menuLibrary = [
@@ -50,12 +51,11 @@ export function buildWeeklyPlan(profile: ChildProfile) {
   const guardrails = runGuardrails(profile);
   if (profile.ageMonths < 6) return { days: [], total: 0, guardrails, coverage: 0 };
   const allowed = menuLibrary.filter(menu => menu.ingredients.every(name => guardrails.safeFoods.some(food => food.name === name)) && menu.estimate <= profile.budget);
-  const fallback = menuLibrary.filter(menu => menu.ingredients.every(name => guardrails.safeFoods.some(food => food.name === name)));
-  const pool = allowed.length ? allowed : fallback;
+  const pool = allowed;
   const dayNames = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
   const days = dayNames.map((day, index) => {
     const menu = pool[index % Math.max(pool.length, 1)] ?? { title: "Perlu konsultasi menu", ingredients: [], texture: "—", estimate: 0, focus: "Keamanan" };
-    return { day, ...menu, verified: menu.ingredients.length > 0, snack: index % 2 === 0 ? "Jambu biji matang" : "Pisang lumat" };
+    return { day, ...menu, verified: false, snack: null };
   });
   const total = days.reduce((sum, day) => sum + day.estimate, 0);
   const uniqueFocus = new Set(days.map(day => day.focus)).size;

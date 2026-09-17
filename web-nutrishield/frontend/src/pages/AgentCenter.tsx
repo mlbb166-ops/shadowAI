@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 import { trpc } from "@/lib/trpc";
+import { endpoints, asList, asRecord, text } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -20,8 +21,8 @@ import {
   Workflow,
 } from "lucide-react";
 
-const profile = { name: "Alya", ageMonths: 18, allergy: "", budget: 20000, region: "Jawa Barat" };
-const measurements = [
+const defaultProfile = { name: "Profil aktif", ageMonths: 18, allergy: "", budget: 20000, region: "Jawa Barat" };
+const defaultMeasurements = [
   { month: "Mei", ageMonths: 15, weightKg: 8.4, heightCm: 74.2 },
   { month: "Jun", ageMonths: 16, weightKg: 8.7, heightCm: 75.1 },
   { month: "Jul", ageMonths: 17, weightKg: 8.9, heightCm: 76.0 },
@@ -29,17 +30,37 @@ const measurements = [
 ];
 const preview = [
   { name: "Profile Observer", action: "Membaca usia, wilayah, anggaran, dan alergi", result: "Siap dijalankan", durationMs: 0 },
-  { name: "Safety Guardian", action: "Menjalankan aturan usia dan filter bahan", result: "Menunggu profil", durationMs: 0 },
-  { name: "Growth Sentinel", action: "Menganalisis perubahan pengukuran", result: "Menunggu data", durationMs: 0 },
-  { name: "Menu Planner", action: "Menyusun rencana 7 hari sesuai batas biaya", result: "Menunggu hasil filter", durationMs: 0 },
-  { name: "Family Coach", action: "Menyederhanakan hasil menjadi tindakan keluarga", result: "Menunggu agent lain", durationMs: 0 },
+  { name: "Data Quality", action: "Memeriksa kelengkapan dan kewajaran data", result: "Menunggu profil", durationMs: 0 },
+  { name: "Safety Policy", action: "Memblokir bahasa darurat dan permintaan dosis", result: "Menunggu pertanyaan", durationMs: 0 },
+  { name: "Food Retriever", action: "Mencari hanya pada katalog yang diizinkan", result: "Menunggu kebijakan", durationMs: 0 },
+  { name: "Action Planner", action: "Memilih aksi yang ada dalam allow-list", result: "Menunggu evidence", durationMs: 0 },
+  { name: "Family Explainer", action: "Menyederhanakan fallback dengan model opsional", result: "Menunggu rencana", durationMs: 0 },
+  { name: "Output Guard", action: "Menahan keluaran yang melanggar kebijakan", result: "Menunggu jawaban", durationMs: 0 },
+  { name: "Action Recorder", action: "Menyimpan aksi dan audit trail", result: "Menunggu validasi", durationMs: 0 },
 ];
 
 export default function AgentCenter() {
   const cycle = trpc.agent.runCycle.useMutation();
   const [tab, setTab] = useState<"activity" | "policy">("activity");
+  const [profile, setProfile] = useState<typeof defaultProfile & { childId?: string }>(defaultProfile);
+  const [measurements, setMeasurements] = useState(defaultMeasurements);
   const agents = cycle.data?.agents ?? preview;
   const run = () => cycle.mutate({ profile, measurements });
+
+  useEffect(() => {
+    void endpoints.dashboard().then((value) => {
+      const dashboard = asRecord(value);
+      const child = asList(dashboard.children)[0];
+      if (child) setProfile((current) => ({ ...current, childId: text(child.id, ""), name: text(child.name, "Profil aktif"), allergy: text(child.allergies, "") }));
+      const rows = asList(dashboard.measurements).slice().reverse().map((row, index) => ({
+        month: text(row.measured_at, `Catatan ${index + 1}`).slice(0, 10),
+        ageMonths: index + 1,
+        weightKg: Number(row.weight_kg || 0),
+        heightCm: Number(row.height_cm || 0),
+      })).filter((row) => row.weightKg > 0 && row.heightCm > 0);
+      if (rows.length) setMeasurements(rows);
+    }).catch(() => undefined);
+  }, []);
 
   return (
     <AppShell
@@ -52,16 +73,16 @@ export default function AgentCenter() {
           <div className="relative">
             <div className="flex flex-wrap items-center gap-2">
               <span className="flex items-center gap-1.5 font-medium text-[#b9efcb]">
-                <CircleDot size={13} /> Orchestrator siap
+                <CircleDot size={13} /> Orchestrator siap diuji
               </span>
-              <span className="text-xs text-[#a9c9b7]">5 agent khusus · 12 aturan keselamatan</span>
+              <span className="text-xs text-[#a9c9b7]">8 tahap allow-listed · fallback deterministik</span>
             </div>
             <h2 className="mt-6 max-w-xl text-3xl font-semibold leading-tight tracking-[-.04em] sm:text-4xl">
               Jalankan satu siklus pendamping keluarga.
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-[#bad1c3]">
-              Agent akan membaca profil Alya, menyaring bahan, meninjau arah pertumbuhan, menyusun
-              menu, lalu menerjemahkan hasil menjadi tindakan sederhana. Semua langkah dicatat.
+              Agent membuat job nyata, memeriksa data dan kebijakan, mencari evidence, menyusun
+              penjelasan terbatas, lalu menyimpan hasil dan audit. Tidak ada eksekusi shell.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button
@@ -194,7 +215,7 @@ export default function AgentCenter() {
                 <Policy
                   icon={<ShieldCheck />}
                   title="Aturan mendahului AI"
-                  text="Usia dan alergi diperiksa secara deterministik."
+                  text="Bahasa darurat dan permintaan dosis diperiksa secara deterministik."
                 />
                 <Policy
                   icon={<Database />}

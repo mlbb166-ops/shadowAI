@@ -44,6 +44,9 @@ wheels/
 # Database temporary WAL files
 *.db-wal
 *.db-shm
+web-nutrishield/database/runtime/*.sqlite3
+web-nutrishield/database/runtime/*.db
+web-nutrishield/database/runtime/*.sqlite
 
 # IDE & OS Files
 .DS_Store

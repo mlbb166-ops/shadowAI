@@ -69,6 +69,17 @@ export async function api<T = unknown>(path: string, options: RequestInit = {}):
   return body as T;
 }
 
+export async function waitForAgentJob(jobId: string, timeoutMs = 90000): Promise<ApiRecord> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const payload = asRecord(await endpoints.job(jobId));
+    const job = asRecord(payload.job);
+    if (["completed", "failed", "blocked"].includes(text(job.status, ""))) return job;
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  }
+  throw new ApiError("Agent masih memproses permintaan. Buka kembali pusat agent untuk melihat statusnya.", 408);
+}
+
 export const endpoints = {
   me: () => api('/auth/me'),
   login: (email: string, password: string) =>
@@ -90,6 +101,9 @@ export const endpoints = {
   publicFoodStats: () => api('/public/food-stats'),
   architecture: () => api('/public/architecture'),
   telegramStatus: () => api('/telegram/status'),
-  telegramCode: () => api('/telegram/link-code', { method: 'POST' }),
+  telegramCode: (childId?: string) => api('/telegram/link-code', {
+    method: 'POST',
+    body: JSON.stringify(childId ? { child_id: childId } : {}),
+  }),
   telegramUnlink: () => api('/telegram/unlink', { method: 'POST' }),
 };

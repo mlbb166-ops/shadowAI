@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { endpoints, asList, asRecord, text } from "@/api";
 import {
   CalendarDays,
   CheckCircle2,
@@ -20,7 +21,7 @@ import {
 
 export default function Planner() {
   const [profile, setProfile] = useState({
-    name: "Alya",
+    name: "Profil aktif",
     ageMonths: 18,
     allergy: "",
     budget: 20000,
@@ -34,10 +35,33 @@ export default function Planner() {
     [data]
   );
 
+  useEffect(() => {
+    void endpoints.dashboard().then((value) => {
+      const child = asList(asRecord(value).children)[0];
+      if (!child) return;
+      const born = child.birth_date ? new Date(String(child.birth_date)) : null;
+      const now = new Date();
+      const ageMonths = born && !Number.isNaN(born.getTime())
+        ? Math.max(0, (now.getFullYear() - born.getFullYear()) * 12 + now.getMonth() - born.getMonth())
+        : 18;
+      setProfile((current) => ({ ...current, name: text(child.name, "Profil aktif"), ageMonths, allergy: text(child.allergies, "") }));
+    }).catch(() => undefined);
+  }, []);
+
+  const saveShoppingList = () => {
+    const content = [`Daftar belanja NutriShield — ${profile.name}`, "", ...shopping.map((item) => `- ${item}`), "", "Template; periksa alergi, kebutuhan, harga, dan ketersediaan bahan."].join("\n");
+    const url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "daftar-belanja-nutrishield.txt";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AppShell
       title="Rencana makan 7 hari"
-      subtitle="Menu lokal yang menyesuaikan profil, alergi, wilayah, dan batas biaya"
+      subtitle="Template menu lokal untuk diedit keluarga; belum menjadi rekomendasi gizi tervalidasi"
     >
       <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
         <div>
@@ -85,18 +109,15 @@ export default function Planner() {
           <section className="mt-5 overflow-hidden rounded-[28px] border border-[#dce7dd] bg-white">
             <div className="flex flex-col gap-4 border-b border-[#e2eae2] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
-                <h2 className="text-xl font-semibold">Minggu ini untuk Alya</h2>
+                <h2 className="text-xl font-semibold">Template minggu ini</h2>
                 <p className="mt-1 text-sm text-[#74877c]">
-                  Klik satu hari untuk melihat rincian dan alasan pilihan.
+                  Klik satu hari untuk melihat rincian. Harga dan komposisi masih berupa estimasi demo.
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1.5 text-xs font-medium text-[#258057]">
-                  <ShieldCheck size={14} /> {data?.coverage ?? 0}% cakupan variasi
+                  <ShieldCheck size={14} /> {data?.coverage ?? 0}% variasi template
                 </span>
-                <Button size="sm" variant="outline">
-                  <Download size={14} className="mr-2" /> PDF
-                </Button>
               </div>
             </div>
             <div className="grid gap-px bg-[#e2eae2] sm:grid-cols-2 lg:grid-cols-3">
@@ -144,8 +165,8 @@ export default function Planner() {
                   {data.days[selected].title}
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-[#bdd3c6]">
-                  Agent memilih kombinasi ini karena lolos filter alergi, berada di bawah anggaran
-                  harian, dan menambah variasi fokus gizi minggu ini.
+                  Template menyaring alergi yang ditulis dan batas biaya secara lokal. Validasi
+                  komposisi, ketersediaan bahan, dan kebutuhan anak tetap diperlukan.
                 </p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {data.days[selected].ingredients.map((item) => (
@@ -161,8 +182,8 @@ export default function Planner() {
                 <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.05] p-4">
                   <p className="text-xs text-[#9fc1ae]">Panduan tekstur</p>
                   <p className="mt-1 text-sm">
-                    {data.days[selected].texture}. Pastikan duri ikan disisihkan sepenuhnya dan
-                    sesuaikan ukuran potongan dengan kemampuan makan anak.
+                    {data.days[selected].texture}. Periksa tulang atau duri bila bahan mengandungnya,
+                    lalu sesuaikan ukuran potongan dengan kemampuan makan anak.
                   </p>
                 </div>
               </div>
@@ -184,7 +205,7 @@ export default function Planner() {
               <p className="text-3xl font-semibold">Rp{(data?.total ?? 0).toLocaleString("id-ID")}</p>
               <p className="mt-1 text-xs text-[#7a8d82]">perkiraan 7 menu utama</p>
               <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#e9eee8]">
-                <div className="h-full w-[68%] rounded-full bg-[#eba944]" />
+                <div className="h-full rounded-full bg-[#eba944]" style={{ width: `${Math.min(100, ((data?.total ?? 0) / Math.max(profile.budget * 7, 1)) * 100)}%` }} />
               </div>
               <div className="mt-4 flex items-center justify-between text-xs">
                 <span className="text-[#7a8d82]">Batas mingguan</span>
@@ -209,7 +230,7 @@ export default function Planner() {
                   {item}
                 </label>
               ))}
-              <Button variant="outline" className="mt-3 w-full">
+              <Button onClick={saveShoppingList} variant="outline" className="mt-3 w-full">
                 <Download size={15} className="mr-2" /> Simpan daftar
               </Button>
             </CardContent>

@@ -1,0 +1,24 @@
+[Unit]
+Description=NutriShield Autonomous Agent Worker
+After=network-online.target nutrishield-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nutrishield
+Group=nutrishield
+WorkingDirectory=/opt/nutrishield/current/web-nutrishield
+EnvironmentFile=/etc/nutrishield/nutrishield.env
+ExecStart=/opt/nutrishield/venv/bin/python -m agents.worker
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/nutrishield
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

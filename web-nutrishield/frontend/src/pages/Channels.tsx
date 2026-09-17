@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import AppShell from "@/components/AppShell";
 import { trpc } from "@/lib/trpc";
+import { endpoints, asList, asRecord, text } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,14 @@ export default function Channels() {
   const testAI = trpc.channels.testAI.useMutation();
   const [channel, setChannel] = useState<ChannelId>("telegram");
   const [message, setMessage] = useState(scenarios[0].message);
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<{
+    childId?: string;
+    name: string;
+    ageMonths: number;
+    allergy: string;
+    budget: number;
+    region: string;
+  }>({
     name: "Alya",
     ageMonths: 18,
     allergy: "",
@@ -57,6 +65,13 @@ export default function Channels() {
     setMessage(scenario.message);
     setProfile((current) => ({ ...current, ageMonths: scenario.age, allergy: scenario.allergy }));
   };
+
+  useEffect(() => {
+    void endpoints.dashboard().then((value) => {
+      const child = asList(asRecord(value).children)[0];
+      if (child) setProfile((current) => ({ ...current, childId: text(child.id, ""), name: text(child.name, current.name), allergy: text(child.allergies, "") }));
+    }).catch(() => undefined);
+  }, []);
 
   return (
     <AppShell

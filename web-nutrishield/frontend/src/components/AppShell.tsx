@@ -1,21 +1,27 @@
 import { Link, useLocation } from "wouter";
-import { Activity, Bell, BookOpenCheck, Bot, CalendarDays, ChevronDown, CircleHelp, HeartPulse, Home, Menu, MessagesSquare, ShieldCheck, UserRound, X } from "lucide-react";
+import { Activity, BookOpenCheck, Bot, CalendarDays, CircleHelp, HeartPulse, Home, LogOut, Menu, MessagesSquare, ShieldCheck, UserRound, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { authService } from "@/services/authService";
 
 const nav = [
   { href: "/app", label: "Beranda", icon: Home },
   { href: "/rencana", label: "Rencana makan", icon: CalendarDays },
   { href: "/pertumbuhan", label: "Pertumbuhan", icon: HeartPulse },
-  { href: "/agent-center", label: "Pusat agent", icon: Bot },
-  { href: "/kanal", label: "Kanal keluarga", icon: MessagesSquare },
+  { href: "/agent-center", label: "Jejak agent", icon: Bot },
+  { href: "/kanal", label: "Telegram & kanal", icon: MessagesSquare },
   { href: "/panduan-bot", label: "Panduan bot", icon: CircleHelp },
   { href: "/sumber-data", label: "Sumber data", icon: BookOpenCheck },
 ];
 
 export default function AppShell({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle: string }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
+  const session = authService.getCurrentSession();
+  const logout = async () => {
+    await authService.logout();
+    setLocation("/login");
+  };
   return (
     <div className="min-h-screen bg-[#f6f8f4] text-[#173d31]">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[252px] flex-col border-r border-[#dfe8df] bg-[#103c31] px-4 py-5 text-white lg:flex">
@@ -31,13 +37,12 @@ export default function AppShell({ children, title, subtitle }: { children: Reac
         <div className="mt-8 rounded-2xl border border-white/10 bg-white/[.07] p-3">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#f2c98a] font-semibold text-[#674515]">
-              A
+              <UserRound size={18} />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">Alya</p>
-              <p className="text-xs text-[#adccba]">18 bulan · aktif</p>
+              <p className="truncate text-sm font-medium">{session?.name || "Akun keluarga"}</p>
+              <p className="truncate text-xs text-[#adccba]">{session?.email || "Sesi aktif"}</p>
             </div>
-            <ChevronDown size={15} className="ml-auto text-[#8fb6a1]" />
           </div>
         </div>
         <nav className="mt-6 space-y-1">
@@ -69,10 +74,10 @@ export default function AppShell({ children, title, subtitle }: { children: Reac
         </nav>
         <div className="mt-auto rounded-2xl border border-white/10 bg-[#174c3e] p-4">
           <div className="flex items-center gap-2 text-xs font-medium text-[#b9efcb]">
-            <Activity size={14} /> Agent terpantau
+            <Activity size={14} /> Jejak agent aktif
           </div>
           <p className="mt-2 text-xs leading-5 text-[#a9c9b7]">
-            Pemeriksaan terakhir hari ini, 08.15 WIB.
+            Setiap pertanyaan dan pemicu dicatat tanpa menyimpan isi sensitif di trace.
           </p>
           <Link
             href="/agent-center"
@@ -80,6 +85,7 @@ export default function AppShell({ children, title, subtitle }: { children: Reac
           >
             Lihat jejak aktivitas
           </Link>
+          <button onClick={() => void logout()} className="mt-4 flex w-full items-center gap-2 border-t border-white/10 pt-4 text-xs text-[#c8ded0] hover:text-white"><LogOut size={14} /> Keluar</button>
         </div>
       </aside>
       {open && (
@@ -142,15 +148,8 @@ export default function AppShell({ children, title, subtitle }: { children: Reac
             </div>
             <div className="ml-auto flex items-center gap-2">
               <div className="hidden items-center gap-2 text-xs font-medium text-[#18754d] sm:flex">
-                <span className="h-2 w-2 rounded-full bg-[#24a565]" /> Sistem aman
+                <span className="h-2 w-2 rounded-full bg-[#24a565]" /> Sesi terlindungi
               </div>
-              <Button
-                size="icon"
-                variant="outline"
-                className="rounded-xl border-[#dce6dd] bg-white"
-              >
-                <Bell size={18} />
-              </Button>
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#f1d19d] text-sm font-semibold text-[#6a4819]">
                 <UserRound size={19} />
               </div>

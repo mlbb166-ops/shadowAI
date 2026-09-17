@@ -1,0 +1,25 @@
+[Unit]
+Description=NutriShield FastAPI
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nutrishield
+Group=nutrishield
+WorkingDirectory=/opt/nutrishield/current/web-nutrishield
+EnvironmentFile=/etc/nutrishield/nutrishield.env
+Environment=AGENT_WORKER_MODE=external
+ExecStart=/opt/nutrishield/venv/bin/python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8080 --workers 2 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/nutrishield
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

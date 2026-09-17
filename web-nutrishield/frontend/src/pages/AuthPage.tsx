@@ -132,7 +132,7 @@ export default function AuthPage({ mode, onLoginSuccess }: AuthPageProps) {
             </div>
 
             <div className="mt-8 border-t border-white/15 pt-6 text-[11px] text-[#97baa4]">
-              NutriShield v2 · Box-Cox LMS WHO 2006 & TKPI Kemenkes RI 2020
+              NutriShield v2 · Guardrail deterministik · Jejak agent tersimpan
             </div>
           </div>
 
@@ -203,10 +203,10 @@ export default function AuthPage({ mode, onLoginSuccess }: AuthPageProps) {
                   <input
                     type={showPassword ? "text" : "password"}
                     required
-                    minLength={isRegister ? 6 : 1}
+                    minLength={isRegister ? 10 : 1}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={isRegister ? "Minimal 6 karakter" : "Kata sandi Anda"}
+                    placeholder={isRegister ? "Minimal 10 karakter" : "Kata sandi Anda"}
                     className="w-full rounded-xl border border-[#cddccd] bg-[#fbfdfb] px-4 py-3.5 pr-12 text-sm text-[#163e31] placeholder:text-[#a3b5a8] focus:border-[#173f34] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173f34]/15 transition-all"
                   />
                   <button
@@ -267,14 +267,6 @@ export default function AuthPage({ mode, onLoginSuccess }: AuthPageProps) {
                 </Link>
               </p>
 
-              <div className="my-1 border-t border-[#e8efe8]" />
-
-              <p className="text-xs text-[#7c8f84]">
-                Petugas / Kader Posyandu?{" "}
-                <Link href="/kader" className="font-semibold text-[#173f34] hover:underline">
-                  Buka Portal Kerja Kader →
-                </Link>
-              </p>
             </div>
           </div>
         </div>
