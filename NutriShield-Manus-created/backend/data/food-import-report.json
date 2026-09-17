@@ -1,0 +1,47 @@
+{
+  "completed_at": "2026-09-16T13:02:04.379+00:00",
+  "counts": {
+    "canonical_records": 7026,
+    "comparison_eligible": 411,
+    "discovery_eligible": 7026,
+    "nutrient_values": 4819,
+    "planning_eligible": 0,
+    "quarantined": 39,
+    "raw_records": 7809,
+    "type_additive_rule": 124,
+    "type_bpom_listing": 4783,
+    "type_packaged_product": 934,
+    "type_traditional_candidate": 39,
+    "type_whole_food_index": 1146
+  },
+  "issues": {
+    "ambiguous_traditional_candidate": 39,
+    "missing_name": 90,
+    "missing_planner_nutrition": 1146
+  },
+  "policy_version": "food-normalization-v2",
+  "run_id": "norm_dZfd3wcP-NpWjQ7O",
+  "sources": {
+    "bpom-btp-11-2019": {
+      "file": "btp_bpom_11_2019.csv",
+      "rows": 124,
+      "sha256": "46d5659a117bd6c94e3affb2432ee3e7b1d83472f2fe84f2baa2a1923af4bb1a"
+    },
+    "mixed-v2": {
+      "file": "food_records.csv",
+      "rows": 6039,
+      "sha256": "b2db044dbb14f3150f34af80ff9ffd7d177c804433fb406e71b033f274d7a213"
+    },
+    "open-food-facts-id": {
+      "file": "indonesia_packaged_foods.csv",
+      "rows": 500,
+      "sha256": "b8a09da33ab1e60638fb1a6aeb4eb6abfaf1acfec606b5837c44c1226311ecf7"
+    },
+    "panganku-ifct": {
+      "file": "panganku_ifct_foods.csv",
+      "rows": 1146,
+      "sha256": "401d8ec96a051031a8f980ce96d0b9f2df8bdbd1f29afe1e6e53ec4e42976b29"
+    }
+  },
+  "started_at": "2026-09-16T13:02:01.131+00:00"
+}

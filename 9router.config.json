@@ -1,0 +1,39 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 27888
+  },
+  "cache": {
+    "enabled": true,
+    "type": "memory",
+    "ttl_seconds": 3600
+  },
+  "compression": {
+    "enabled": true,
+    "strategy": "rtk_token_saver"
+  },
+  "providers": [
+    {
+      "name": "google_gemini",
+      "type": "gemini",
+      "api_key": "${GEMINI_API_KEY}",
+      "models": ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"],
+      "priority": 1
+    },
+    {
+      "name": "groq_free_tier",
+      "type": "openai_compatible",
+      "base_url": "https://api.groq.com/openai/v1",
+      "api_key": "${GROQ_API_KEY}",
+      "models": ["llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
+      "priority": 2
+    },
+    {
+      "name": "local_nemotron",
+      "type": "openai_compatible",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "models": ["nemotron-mini:latest", "nemotron:latest"],
+      "priority": 3
+    }
+  ]
+}

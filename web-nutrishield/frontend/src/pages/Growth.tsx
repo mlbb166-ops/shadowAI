@@ -1,0 +1,280 @@
+import AppShell from "@/components/AppShell";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ArrowUpRight,
+  CalendarCheck,
+  Download,
+  FileHeart,
+  HeartPulse,
+  Info,
+  MapPin,
+  Plus,
+  Ruler,
+  Scale,
+  ShieldAlert,
+} from "lucide-react";
+
+export default function Growth() {
+  const sample = trpc.growth.sample.useQuery();
+  const measurements = sample.data ?? [];
+  const analysis = trpc.growth.analyze.useQuery(
+    { measurements },
+    { enabled: measurements.length > 0 }
+  );
+  const current = measurements[measurements.length - 1];
+
+  return (
+    <AppShell
+      title="Pemantauan pertumbuhan"
+      subtitle="Catat perubahan, lihat arahnya, dan tahu kapan perlu meminta bantuan"
+    >
+      <section className="grid gap-5 sm:grid-cols-3">
+        <Stat
+          icon={<Scale />}
+          label="Berat terakhir"
+          value={current ? `${current.weightKg} kg` : "—"}
+          note="+0,3 kg dari bulan lalu"
+        />
+        <Stat
+          icon={<Ruler />}
+          label="Tinggi terakhir"
+          value={current ? `${current.heightCm} cm` : "—"}
+          note="+1,1 cm dari bulan lalu"
+        />
+        <Card className="border-[#cde3d2] bg-[#eaf6ec] shadow-none">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-white text-[#258259]">
+                <HeartPulse />
+              </div>
+              <div>
+                <p className="text-xs text-[#678071]">Status agent</p>
+                <p className="mt-1 text-lg font-semibold text-[#1d6e4c]">
+                  {analysis.data?.label ?? "Menganalisis"}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-xs leading-5 text-[#5e796a]">{analysis.data?.summary}</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
+        <Card className="border-[#dce7dd] shadow-none">
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-xl">Arah perubahan Alya</CardTitle>
+                <p className="mt-1 text-sm text-[#75887d]">
+                  Bukan diagnosis atau kurva WHO resmi pada tahap demo.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline">
+                  <Plus size={14} className="mr-2" /> Tambah catatan
+                </Button>
+                <Button size="sm" variant="outline">
+                  <Download size={14} className="mr-2" /> Unduh
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[330px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={measurements} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="weight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#32a36a" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#32a36a" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#e8eee8" strokeDasharray="4 4" vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#72857a", fontSize: 12 }}
+                  />
+                  <YAxis
+                    domain={[7.5, 10]}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#72857a", fontSize: 11 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 14,
+                      border: "1px solid #dce7dd",
+                      boxShadow: "0 10px 30px rgba(30,70,48,.08)",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="weightKg"
+                    name="Berat (kg)"
+                    stroke="#26945e"
+                    strokeWidth={3}
+                    fill="url(#weight)"
+                    dot={{ r: 5, fill: "#fff", strokeWidth: 3 }}
+                    isAnimationActive={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-2 flex items-center gap-2 rounded-xl bg-[#f5f8f4] px-4 py-3 text-xs text-[#72857a]">
+              <Info size={14} /> Grafik menunjukkan data yang dicatat keluarga; interpretasi klinis
+              tetap dilakukan tenaga kesehatan.
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-5">
+          <Card className="border-[#dce7dd] shadow-none">
+            <CardHeader>
+              <CardTitle className="text-lg">Riwayat pengukuran</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {measurements
+                .slice()
+                .reverse()
+                .map((item, index) => (
+                  <div key={item.month} className="flex items-center gap-3">
+                    <div
+                      className={`grid h-9 w-9 place-items-center rounded-xl ${
+                        index === 0 ? "bg-[#e3f3e7] text-[#258259]" : "bg-[#f2f5f1] text-[#829389]"
+                      }`}
+                    >
+                      <CalendarCheck size={17} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {item.month} · {item.ageMonths} bulan
+                      </p>
+                      <p className="text-xs text-[#7e9086]">
+                        {item.weightKg} kg · {item.heightCm} cm
+                      </p>
+                    </div>
+                    {index === 0 && (
+                      <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide text-[#29835b]">
+                        Terbaru
+                      </span>
+                    )}
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+
+          <Card className="border-[#eed7ac] bg-[#fff9ea] shadow-none">
+            <CardContent className="p-5">
+              <FileHeart className="text-[#ad771f]" />
+              <h3 className="mt-4 font-semibold">Siap dibawa ke Posyandu</h3>
+              <p className="mt-2 text-xs leading-5 text-[#796947]">
+                NutriShield dapat merangkum pengukuran, pola makan, dan perhatian penting—tanpa
+                memberi diagnosis.
+              </p>
+              <Button className="mt-4 w-full bg-[#7c5c28] text-white hover:bg-[#684c20]">
+                <Download size={15} className="mr-2" /> Buat ringkasan kunjungan
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-[28px] border border-[#dce7dd] bg-white p-6">
+        <div className="grid gap-8 lg:grid-cols-[.75fr_1.25fr]">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[.14em] text-[#27835a]">
+              Alur keselamatan
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight">
+              Apa yang terjadi jika pertumbuhan melambat?
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#73877b]">
+              Agent tidak mencoba mendiagnosis. Ia membantu keluarga melihat pola dan mempersiapkan
+              informasi untuk tenaga kesehatan.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Flow
+              icon={<ShieldAlert />}
+              title="Deteksi pola"
+              text="Membandingkan catatan berurutan."
+            />
+            <Flow
+              icon={<FileHeart />}
+              title="Buat ringkasan"
+              text="Menyusun fakta tanpa spekulasi."
+            />
+            <Flow
+              icon={<MapPin />}
+              title="Arahkan bantuan"
+              text="Mendorong kunjungan Posyandu/Puskesmas."
+            />
+          </div>
+        </div>
+      </section>
+    </AppShell>
+  );
+}
+
+function Stat({
+  icon,
+  label,
+  value,
+  note,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  note: string;
+}) {
+  return (
+    <Card className="border-[#dce7dd] shadow-none">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs text-[#74877c]">{label}</p>
+            <p className="mt-2 text-3xl font-semibold">{value}</p>
+          </div>
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#edf5ee] text-[#2a835c]">
+            {icon}
+          </div>
+        </div>
+        <p className="mt-4 flex items-center gap-1 text-xs text-[#2d855e]">
+          <ArrowUpRight size={13} />
+          {note}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Flow({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-[#f7f9f6] p-5">
+      <div className="text-[#2a835c]">{icon}</div>
+      <p className="mt-5 text-sm font-semibold">{title}</p>
+      <p className="mt-2 text-xs leading-5 text-[#74877c]">{text}</p>
+    </div>
+  );
+}

@@ -1,0 +1,16 @@
+{
+  "name": "NutriShield — Asisten Pencegahan Stunting 1.000 HPK",
+  "short_name": "NutriShield",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0F1D",
+  "theme_color": "#0D9488",
+  "description": "Platform Agentic AI Cerdas untuk Pemantauan Tumbuh Kembang Balita Posyandu & Kedaulatan Pangan Lokal",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

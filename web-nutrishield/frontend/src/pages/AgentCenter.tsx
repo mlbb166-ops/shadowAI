@@ -1,0 +1,294 @@
+import { useState } from "react";
+import AppShell from "@/components/AppShell";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Activity,
+  ArrowRight,
+  BrainCircuit,
+  CalendarClock,
+  CheckCircle2,
+  CircleDot,
+  Clock3,
+  Database,
+  Eye,
+  FileCheck2,
+  Play,
+  RefreshCcw,
+  ShieldCheck,
+  Workflow,
+} from "lucide-react";
+
+const profile = { name: "Alya", ageMonths: 18, allergy: "", budget: 20000, region: "Jawa Barat" };
+const measurements = [
+  { month: "Mei", ageMonths: 15, weightKg: 8.4, heightCm: 74.2 },
+  { month: "Jun", ageMonths: 16, weightKg: 8.7, heightCm: 75.1 },
+  { month: "Jul", ageMonths: 17, weightKg: 8.9, heightCm: 76.0 },
+  { month: "Agu", ageMonths: 18, weightKg: 9.2, heightCm: 77.1 },
+];
+const preview = [
+  { name: "Profile Observer", action: "Membaca usia, wilayah, anggaran, dan alergi", result: "Siap dijalankan", durationMs: 0 },
+  { name: "Safety Guardian", action: "Menjalankan aturan usia dan filter bahan", result: "Menunggu profil", durationMs: 0 },
+  { name: "Growth Sentinel", action: "Menganalisis perubahan pengukuran", result: "Menunggu data", durationMs: 0 },
+  { name: "Menu Planner", action: "Menyusun rencana 7 hari sesuai batas biaya", result: "Menunggu hasil filter", durationMs: 0 },
+  { name: "Family Coach", action: "Menyederhanakan hasil menjadi tindakan keluarga", result: "Menunggu agent lain", durationMs: 0 },
+];
+
+export default function AgentCenter() {
+  const cycle = trpc.agent.runCycle.useMutation();
+  const [tab, setTab] = useState<"activity" | "policy">("activity");
+  const agents = cycle.data?.agents ?? preview;
+  const run = () => cycle.mutate({ profile, measurements });
+
+  return (
+    <AppShell
+      title="Pusat kendali agent"
+      subtitle="Lihat siapa mengerjakan apa, aturan yang dipakai, dan hasil setiap langkah"
+    >
+      <section className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
+        <div className="relative overflow-hidden rounded-[30px] bg-[#123f33] p-6 text-white sm:p-8">
+          <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-[#68c68b]/15 blur-3xl" />
+          <div className="relative">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex items-center gap-1.5 font-medium text-[#b9efcb]">
+                <CircleDot size={13} /> Orchestrator siap
+              </span>
+              <span className="text-xs text-[#a9c9b7]">5 agent khusus · 12 aturan keselamatan</span>
+            </div>
+            <h2 className="mt-6 max-w-xl text-3xl font-semibold leading-tight tracking-[-.04em] sm:text-4xl">
+              Jalankan satu siklus pendamping keluarga.
+            </h2>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-[#bad1c3]">
+              Agent akan membaca profil Alya, menyaring bahan, meninjau arah pertumbuhan, menyusun
+              menu, lalu menerjemahkan hasil menjadi tindakan sederhana. Semua langkah dicatat.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button
+                onClick={run}
+                disabled={cycle.isPending}
+                className="h-13 rounded-xl bg-[#b9efcb] px-8 text-base font-bold text-[#123f33] shadow-md hover:bg-[#d2f7dd] hover:scale-105 transition-all"
+              >
+                {cycle.isPending ? (
+                  <>
+                    <RefreshCcw size={16} className="mr-2 animate-spin" /> Agent sedang bekerja
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} className="mr-2 fill-current" /> Jalankan sekarang
+                  </>
+                )}
+              </Button>
+              {cycle.data && (
+                <div className="flex items-center gap-2 px-2 text-xs text-[#c5ddcf]">
+                  <CheckCircle2 size={15} className="text-[#85dda3]" /> Selesai dalam{" "}
+                  {(cycle.data.finishedAt - cycle.data.startedAt) / 1000} detik
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <Card className="border-[#dce7dd] shadow-none">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <CalendarClock size={20} className="text-[#2b855d]" /> Otomasi pendamping
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-2xl bg-[#f3f7f2] p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">Pemeriksaan pagi</p>
+                  <p className="mt-1 text-xs text-[#768a7e]">Setiap hari · 07.00 WIB</p>
+                </div>
+                <span className="text-xs font-medium text-[#8a691f]">Belum aktif</span>
+              </div>
+            </div>
+            <p className="mt-4 text-xs leading-5 text-[#72867a]">
+              Otomasi terjadwal baru dapat diaktifkan setelah aplikasi dipasang dan profil pengguna
+              disimpan. Demo ini tidak mengaku berjalan di latar belakang.
+            </p>
+            <Button variant="outline" disabled className="mt-4 w-full">
+              Aktifkan setelah deployment
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-5 grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
+        <Card className="border-[#dce7dd] shadow-none">
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-xl">Jejak eksekusi</CardTitle>
+                <p className="mt-1 text-sm text-[#75887d]">
+                  Setiap hasil dapat dilacak kembali ke agent dan aturannya.
+                </p>
+              </div>
+              <div className="flex rounded-xl bg-[#eff3ee] p-1 text-xs">
+                <button
+                  onClick={() => setTab("activity")}
+                  className={`rounded-lg px-3 py-2 ${
+                    tab === "activity" ? "bg-white font-medium shadow-sm" : "text-[#74877c]"
+                  }`}
+                >
+                  Aktivitas
+                </button>
+                <button
+                  onClick={() => setTab("policy")}
+                  className={`rounded-lg px-3 py-2 ${
+                    tab === "policy" ? "bg-white font-medium shadow-sm" : "text-[#74877c]"
+                  }`}
+                >
+                  Kebijakan
+                </button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {tab === "activity" ? (
+              <div className="relative space-y-0">
+                {agents.map((agent, index) => {
+                  const done = Boolean(cycle.data);
+                  return (
+                    <div key={agent.name} className="relative flex gap-4 pb-6 last:pb-0">
+                      <div className="relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#d7e5da] bg-white">
+                        {done ? (
+                          <CheckCircle2 size={18} className="text-[#2aa265]" />
+                        ) : (
+                          <span className="h-2.5 w-2.5 rounded-full bg-[#bdc9c0]" />
+                        )}
+                      </div>
+                      {index < agents.length - 1 && (
+                        <div className="absolute left-5 top-10 h-full w-px bg-[#dfe8df]" />
+                      )}
+                      <div className="flex-1 rounded-2xl border border-[#e2eae2] bg-[#fbfcfa] p-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">{agent.name}</p>
+                          <span className="text-[10px] uppercase tracking-[.12em] text-[#82958a]">
+                            Agent {index + 1}
+                          </span>
+                          {done && (
+                            <span className="ml-auto flex items-center gap-1 text-[10px] text-[#70847a]">
+                              <Clock3 size={11} />
+                              {agent.durationMs}ms
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-2 text-xs text-[#6e8277]">{agent.action}</p>
+                        <div
+                          className={`mt-3 inline-flex rounded-lg px-2.5 py-1.5 text-xs ${
+                            done ? "bg-[#e8f5ea] text-[#247c54]" : "bg-[#eef1ed] text-[#839187]"
+                          }`}
+                        >
+                          {agent.result}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Policy
+                  icon={<ShieldCheck />}
+                  title="Aturan mendahului AI"
+                  text="Usia dan alergi diperiksa secara deterministik."
+                />
+                <Policy
+                  icon={<Database />}
+                  title="Sumber tercatat"
+                  text="Setiap bahan membawa ID dan nama sumber."
+                />
+                <Policy
+                  icon={<Eye />}
+                  title="Tidak cukup data = jujur"
+                  text="Agent berhenti atau meminta data tambahan."
+                />
+                <Policy
+                  icon={<FileCheck2 />}
+                  title="Bukan diagnosis"
+                  text="Eskalasi diarahkan ke tenaga kesehatan."
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-5">
+          <Card className="border-[#dce7dd] shadow-none">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Activity size={20} className="text-[#28845b]" /> Hasil siklus
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {cycle.data ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Mini label="Bukti diperiksa" value={String(cycle.data.evidenceCount)} />
+                    <Mini label="Sumber dipakai" value={String(cycle.data.sourceCount)} />
+                  </div>
+                  <div className="mt-4 rounded-2xl bg-[#eef7ef] p-4">
+                    <p className="text-xs text-[#6e8477]">Run ID</p>
+                    <p className="mt-1 font-mono text-sm font-semibold">{cycle.data.runId}</p>
+                  </div>
+                  <h4 className="mt-5 text-sm font-semibold">Tindakan berikutnya</h4>
+                  <div className="mt-3 space-y-2">
+                    {cycle.data.nextActions.map((action) => (
+                      <div key={action} className="flex items-start gap-2 text-xs leading-5 text-[#647b6e]">
+                        <ArrowRight size={14} className="mt-0.5 shrink-0 text-[#2a855c]" />
+                        {action}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 text-center">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#eef5ef] text-[#6b8b76]">
+                    <Workflow />
+                  </div>
+                  <p className="mt-4 text-sm font-semibold">Belum ada siklus baru</p>
+                  <p className="mt-2 text-xs leading-5 text-[#7b8d83]">
+                    Tekan “Jalankan sekarang” untuk melihat hasil nyata dari backend.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-[#dce7dd] bg-[#f5f0ff] shadow-none">
+            <CardContent className="p-5">
+              <BrainCircuit className="text-[#7757a7]" />
+              <p className="mt-4 text-sm font-semibold">AI hanya di langkah yang tepat</p>
+              <p className="mt-2 text-xs leading-5 text-[#74668b]">
+                Perhitungan, pemblokiran, dan status pertumbuhan tidak diserahkan kepada model
+                bahasa.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    </AppShell>
+  );
+}
+
+function Policy({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <div className="rounded-2xl border border-[#e1e9e1] p-5">
+      <div className="text-[#2a835c]">{icon}</div>
+      <p className="mt-4 text-sm font-semibold">{title}</p>
+      <p className="mt-2 text-xs leading-5 text-[#74877c]">{text}</p>
+    </div>
+  );
+}
+
+function Mini({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-[#f5f8f4] p-4">
+      <p className="text-2xl font-semibold">{value}</p>
+      <p className="mt-1 text-[11px] text-[#7a8d82]">{label}</p>
+    </div>
+  );
+}

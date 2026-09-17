@@ -1,0 +1,61 @@
+{
+  "dataset_name": "Indonesia packaged food labels and nutrition snapshot",
+  "record_count": 500,
+  "unique_barcodes": 500,
+  "scope": "Products returned by the Open Food Facts API with countries_tags_en=indonesia, first 20 pages at page_size=100, sorted by unique_scans_n.",
+  "retrieved_at_utc": "2026-09-15T06:21:10.655304+00:00",
+  "raw_files": [
+    "raw/openfoodfacts-indonesia-page-001.json",
+    "raw/openfoodfacts-indonesia-page-002.json",
+    "raw/openfoodfacts-indonesia-page-003.json",
+    "raw/openfoodfacts-indonesia-page-004.json",
+    "raw/openfoodfacts-indonesia-page-005.json",
+    "raw/openfoodfacts-indonesia-page-006.json",
+    "raw/openfoodfacts-indonesia-page-007.json",
+    "raw/openfoodfacts-indonesia-page-008.json",
+    "raw/openfoodfacts-indonesia-page-009.json",
+    "raw/openfoodfacts-indonesia-page-010.json",
+    "raw/openfoodfacts-indonesia-page-011.json"
+  ],
+  "processed_files": [
+    "processed/indonesia_packaged_foods.csv",
+    "processed/indonesia_packaged_foods.jsonl",
+    "processed/indonesia_packaged_foods.json"
+  ],
+  "primary_source": "https://world.openfoodfacts.org/data",
+  "api_source": "https://world.openfoodfacts.org/api/v2/search",
+  "license": "Open Database License (ODbL); individual contents under Database Contents License (DbCL); read the source terms before redistribution.",
+  "limitations": [
+    "This is not a complete census of Indonesian food products.",
+    "Open Food Facts is community-contributed; records are not independently verified by this package.",
+    "A missing value is preserved as empty and flagged; no values were invented or imputed.",
+    "The API result is a snapshot and may change; raw API responses are included for auditability.",
+    "Organic, halal, additive, and nutrition labels are recorded only when present in the source record."
+  ],
+  "total_records_across_collections": 1646,
+  "collections": [
+    {
+      "name": "panganku_ifct_foods",
+      "record_count": 1146,
+      "source": "https://www.panganku.org/en-EN/semua_nutrisi",
+      "format_files": [
+        "processed/panganku_ifct_foods.csv",
+        "processed/panganku_ifct_foods.jsonl",
+        "processed/panganku_ifct_foods.json"
+      ],
+      "scope": "Official searchable table index from Indonesian Food Composition Table (IFCT)."
+    },
+    {
+      "name": "indonesia_packaged_foods",
+      "record_count": 500,
+      "source": "https://world.openfoodfacts.org/api/v2/search",
+      "format_files": [
+        "processed/indonesia_packaged_foods.csv",
+        "processed/indonesia_packaged_foods.jsonl",
+        "processed/indonesia_packaged_foods.json"
+      ],
+      "scope": "First successful pages of products returned with countries_tags_en=indonesia, sorted by unique_scans_n."
+    }
+  ],
+  "package_notes": "Combined snapshot contains 1,646 records from two sources. Raw files and parsers are included for auditability and reruns."
+}

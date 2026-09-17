@@ -1,0 +1,33 @@
+{
+  "name": "shadow-brainstorm-agent",
+  "version": "1.0.0",
+  "description": "Isolated OpenClaw Agent for Team Shadow AI (Hisyam & Salsa)",
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": 27888,
+    "provider": "9router",
+    "fallback_providers": ["ollama", "groq", "anthropic", "openai"]
+  },
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "command_prefix": "!shield",
+      "allowed_users": ["*"]
+    },
+    "telegram": {
+      "enabled": true,
+      "route_via": "9router",
+      "allowed_users": ["*"]
+    }
+  },
+  "knowledge_base": {
+    "directory": "./knowledge_base",
+    "auto_reload": true,
+    "top_k": 3
+  },
+  "isolation": {
+    "sandbox": true,
+    "max_memory_mb": 1536,
+    "allowed_dirs": ["/home/mmm/shadow-agent"]
+  }
+}

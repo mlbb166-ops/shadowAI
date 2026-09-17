@@ -1,0 +1,22 @@
+{
+  "generated_at_utc": "2026-09-15T08:11:59.339956+00:00",
+  "record_count": 6039,
+  "collections": {
+    "openfoodfacts_packaged": 1000,
+    "bpom_registered": 5000,
+    "traditional_food_candidates": 39
+  },
+  "parameters": {
+    "off_limit": 5000,
+    "bpom_limit": 5000,
+    "traditional_per_province": 10,
+    "skip_wikidata": true,
+    "db_path": "C:\\Users\\DELL\\Downloads\\Shadow AI\\web-nutrishield\\database\\nutrishield.db"
+  },
+  "raw_directory": "raw_pipeline",
+  "outputs": [
+    "processed_pipeline/food_records.csv",
+    "processed_pipeline/food_records.jsonl"
+  ],
+  "no_fabrication_policy": "Missing values remain empty; traditional candidates are not treated as verified regional facts; each record carries source and verification status."
+}
